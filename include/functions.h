@@ -1,12 +1,14 @@
 #ifndef FUNCTIONS_H
 #define FUNCTIONS_H
-#include <iostream>
 
+#include <vector>
+#include "cinema.h"
+#include "movie.h"
 
-void signIn();
-void signUp();
-void addFilm();
-void removeFilm();
 void start();
+void addMovie(std::vector<Movie>& movies);
+void removeMovie(std::vector<Movie>& movies);
+void searchMovie(const std::vector<Movie>& movies);
+void startSystem(std::vector<Cinema>& cinemas, std::vector<Movie>& movies);
 
-#endif //FUNCTIONS_H
+#endif
