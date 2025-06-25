@@ -9,6 +9,6 @@ void start();
 void addMovie(std::vector<Movie>& movies);
 void removeMovie(std::vector<Movie>& movies);
 void searchMovie(const std::vector<Movie>& movies);
-void startSystem(std::vector<Cinema>& cinemas, std::vector<Movie>& movies);
+void bookTicket(std::vector<Cinema>& cinemas);
 
 #endif
