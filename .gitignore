@@ -21,7 +21,7 @@ cmake-build-*/
 *~
 *.tmp
 *.log
-
+!data/data.txt
 
 .DS_Store
 Thumbs.db
