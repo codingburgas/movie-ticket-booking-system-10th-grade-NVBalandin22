@@ -10,5 +10,7 @@ void addMovie(std::vector<Movie>& movies);
 void removeMovie(std::vector<Movie>& movies);
 void searchMovie(const std::vector<Movie>& movies);
 void bookTicket(std::vector<Cinema>& cinemas);
+void loadData(std::vector<Cinema>& cinemas, std::vector<Movie>& movies);
+void saveData(const std::vector<Cinema>& cinemas);
 
 #endif
