@@ -259,25 +259,29 @@ void bookTicket(std::vector<Cinema>& cinemas) {
 void start() {
     std::vector<Cinema> cinemas;
     std::vector<Movie> movies;
-
     loadData(cinemas, movies);
 
-    int choice;
-    while (true) {
-        std::cout << "\n1.Add Movie 2.Remove Movie 3.Search Movie 4.View Showtimes 5.Book Ticket 6.Exit\nChoice: ";
-        std::cin >> choice;
-        if (choice == 1) addMovie(movies);
-        else if (choice == 2) removeMovie(movies);
-        else if (choice == 3) searchMovie(movies);
-        else if (choice == 4) {
-            std::string title;
-            std::cout << "Movie title: "; std::cin >> title;
-            for (Cinema& c : cinemas) c.displayShows(title);
-        } else if (choice == 5) bookTicket(cinemas);
-        else if (choice == 6) {
-            saveData(cinemas);
-            break;
-        } else std::cout << "Invalid.\n";
+    int userChoice;
+    std::cout << "1.User 2.Admin\n";
+    std::cin >> userChoice;
+
+    if (userChoice == 2) {
+        adminMenu(cinemas, movies);
+    } else {
+        int choice;
+        while (true) {
+            std::cout << "\n1.Search Movie 2.View Showtimes 3.Book Ticket 4.Exit\nChoice: ";
+            std::cin >> choice;
+            if (choice == 1) searchMovie(movies);
+            else if (choice == 2) {
+                std::string title;
+                std::cout << "Movie title: "; std::cin >> title;
+                for (Cinema& c : cinemas) c.displayShows(title);
+            } else if (choice == 3) bookTicket(cinemas);
+            else if (choice == 4) break;
+            else std::cout << "Invalid.\n";
+        }
     }
+    saveData(cinemas);
 }
 
