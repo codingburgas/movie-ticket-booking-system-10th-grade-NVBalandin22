@@ -6,6 +6,9 @@ cmake-build-*/
 .vscode/
 .idea/
 
+data/*
+!data/data.txt
+
 
 *.exe
 *.obj
@@ -21,7 +24,7 @@ cmake-build-*/
 *~
 *.tmp
 *.log
-!data/data.txt
+
 
 .DS_Store
 Thumbs.db

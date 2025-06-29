@@ -7,6 +7,7 @@
 
 struct Seat {
     int number;
+    std::string type;
     bool booked;
 };
 
