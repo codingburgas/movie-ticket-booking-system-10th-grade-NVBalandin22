@@ -259,6 +259,7 @@ void updateMovie(std::vector<Movie>& movies) {
 
 void removeMovie(std::vector<Movie>& movies) {
     std::string title;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter title to remove: "; std::getline(std::cin, title);
     for (auto it = movies.begin(); it != movies.end(); ++it) {
         if (it->title == title) {
@@ -304,7 +305,7 @@ void addShow(std::vector<Cinema>& cinemas) {
 void updateShow(std::vector<Cinema>& cinemas) {
     std::string cinemaName, movieTitle, time;
     int hallNumber;
-
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Cinema name: "; std::cin >> cinemaName;
     Cinema* cinema = nullptr;
     for (Cinema& c : cinemas) if (c.name == cinemaName) cinema = &c;
@@ -314,12 +315,13 @@ void updateShow(std::vector<Cinema>& cinemas) {
     Hall* hall = nullptr;
     for (Hall& h : cinema->halls) if (h.hallNumber == hallNumber) hall = &h;
     if (!hall) { std::cout << "Hall not found.\n"; return; }
-
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Movie title: "; std::cin >> movieTitle;
     std::cout << "Show time: "; std::cin >> time;
 
     for (Show& s : hall->shows) {
         if (s.movie.title == movieTitle && s.time == time) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             std::cout << "Movie title: "; std::getline(std::cin, s.movie.title);
             std::cout << "Genre: "; std::getline(std::cin, s.movie.genre);
             std::cout << "Language: "; std::getline(std::cin, s.movie.language);
@@ -359,6 +361,7 @@ void deleteShow(std::vector<Cinema>& cinemas) {
 
 void addCinema(std::vector<Cinema>& cinemas) {
     Cinema cinema;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter new cinema name: ";std::getline(std::cin, cinema.name);
     cinemas.push_back(cinema);
     std::cout << "Cinema added.\n";
@@ -366,6 +369,7 @@ void addCinema(std::vector<Cinema>& cinemas) {
 
 void updateCinema(std::vector<Cinema>& cinemas) {
     std::string name;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter cinema name to update: "; std::getline(std::cin, name);
 
     for (Cinema& c : cinemas) {
@@ -380,6 +384,7 @@ void updateCinema(std::vector<Cinema>& cinemas) {
 
 void deleteCinema(std::vector<Cinema>& cinemas) {
     std::string name;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter cinema name to delete: ";
     std::getline(std::cin, name);
 
