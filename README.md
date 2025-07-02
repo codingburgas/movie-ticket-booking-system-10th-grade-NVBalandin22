@@ -1,91 +1,128 @@
-[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/LIdE0kg1)
-# 2223-10: On the job training (OTJ) project
+<h1 align="center">Movie Ticket Booking System</h1>
 
-# Movie Ticket booking system
-This document describes the OTJ project for 10th graders. **It will be updated frequently**.
+<hr>
 
-# 1. Assignment Goals
-The movie ticket booking system is a system that allows customers to book shows for their favorite movies. The booking system has information on all cinemas present in different cities and the hall information for each cinema. There are numerous movies stored in the system database. Each movie can have multiple shows playing in a particular cinema. The customer can search and select a movie for which they wish to book a show. The system displays a seating layout that identifies booked and available seats so that the customer can choose to reserve available seats. Once the customer completes the payment for the booking, the seat booking is confirmed and the customer receives an email notification.
+<h2>Overview</h2>
+<p>The <strong>Movie Ticket Booking System</strong> is a C++ console application designed for booking movie tickets and managing cinema operations. It offers functionality for users to search for movies, view showtimes, book seats, and allows administrators to manage movies, cinemas, halls, and shows, with robust notifications management.</p>
 
-# 2. Expectations from the interviewee
-Numerous components are present in a typical movie ticket booking system, each with specific constraints and requirements placed on them. The following provides an overview of some of the main expectations that the interviewer will want to hear you discuss in more detail during the interview.
+<hr>
 
-## 2.1. Seat selection
-Selecting a seat is an essential part of the movie ticket booking system. The system has to make sure that no two people can book the same seat. The interviewer expects you to ask questions to identify how the system will work in these situations:
+<h2>Features</h2>
+<ul>
+  <li><strong>Multiple Cinemas & Halls</strong>: Manage multiple cinemas, each with several halls.</li>
+  <li><strong>Movie Management</strong>:
+    <ul>
+      <li>Add new movies.</li>
+      <li>Update existing movies.</li>
+      <li>Delete movies.</li>
+    </ul>
+  </li>
+  <li><strong>Show Management</strong>:
+    <ul>
+      <li>Add, update, and remove showtimes.</li>
+    </ul>
+  </li>
+  <li><strong>Seat Selection & Pricing</strong>:
+    <ul>
+      <li>Silver, Gold, Platinum seat categories.</li>
+      <li>Individual seat booking and status management.</li>
+    </ul>
+  </li>
+  <li><strong>Advanced Search</strong>:
+    <ul>
+      <li>Search movies by title, genre, language, or release date.</li>
+      <li>Display associated cinema, hall, and showtime details.</li>
+    </ul>
+  </li>
+  <li><strong>Notifications System</strong>:
+    <ul>
+      <li>New movie releases, bookings, and cancellations notifications.</li>
+      <li>Notifications stored and marked as read after viewing.</li>
+    </ul>
+  </li>
+  <li><strong>Admin Authentication</strong>:
+    <ul>
+      <li>Secure login (admin@gmail.com / manager4365).</li>
+      <li>Automatic data deletion after three failed attempts.</li>
+    </ul>
+  </li>
+</ul>
 
-* How will the system make sure that multiple users do not book the same seat?
-* Will there be a timeout session that reserves seats temporarily? Will the system use a first come, first serve algorithm?
-* Will there be transaction locks involved in the system?
+<hr>
 
-## 2.2. Payment handling
-One of the most significant attributes of the movie ticket booking system is the payment structure that it provides to its customers. This can vary, so the interviewer would expect you to ask the questions listed below:
+<h2>Prerequisites</h2>
+<ul>
+  <li><strong>C++17 compiler (GCC/Clang/MSVC)</strong></li>
+  <li><strong>CMake (3.15+)</strong></li>
+  <li><strong>Git (for version control)</strong></li>
+</ul>
 
-* What payment methods can the customer use (for example, credit card or cash)?
-* How is the payment performed? Does the customer pay themselves online or through a ticket agent on the location?
+<hr>
 
-## 2.3. Price variance
-We touched upon the payment methods of the movie ticket booking system, now, the pricing model needs to be clarified by the interviewer, and therefore you may ask questions like these:
-* How will the price of the booking be calculated? Will it vary based on the popularity of the show?
-* Does the seat type affect the pricing?
-* Will there be discount coupon codes?
+<h2>How to Build and Run</h2>
+<h3>1. Clone Repository</h3>
 
-## 2.4. Duplication
-There will be many duplicate instances in our system. The interviewer expects you to ask questions like these:
-* How are we handling these instances, such as the same cinema having multiple cinema halls showing different movies simultaneously?
-* Is the same movie being shown at different times in the same cinema/hall?
+```bash
+git clone https://github.com/codingburgas/movie-ticket-booking-system-10th-grade-NVBalandin22.git
+cd movie-ticket-booking-system
+```
 
-# 3. Requirements for the Movie Ticket Booking System
-The following are the requirements that we have defined for the movie ticket booking problem:
+<h3>2. Build with CMake</h3>
 
-### Stage One
-* R1: There exist multiple cinemas in the city, and the cinema has multiple halls.
+```bash
+cmake -S . -B build
+cmake --build build
+```
 
-* R2: Each movie in the cinema can have multiple shows, however, one hall will only show one show at a time.
+<h3>3. Run Application</h3>
 
-* R3: The cinema displays all available showtimes of a movie.
+```bash
+cd build
+./MovieBookingSystem # On Windows: MovieBookingSystem.exe
+```
 
-* R4: Users can search movies based on the following four criteria: title, language, genre, and release date.
+<hr>
 
-### Stage Two
-* R5: Users can make a booking at any cinema hall at the available showtime.
+<h2>File Structure</h2>
+<pre>
+.
+├── data/
+│   ├── data.txt (cinema and show data)
+│   └── notifications.txt (notification data)
+├── include/
+│   ├── cinema.h
+│   ├── functions.h
+│   ├── movie.h
+│   └── show.h
+├── src/
+│   ├── cinema.cpp
+│   ├── functions.cpp
+│   ├── main.cpp
+│   ├── movie.cpp
+│   └── show.cpp
+├── CMakeLists.txt
+└── README.md
+</pre>
 
-* R6: The booking can either be made by the customer online or via a walk-in by the ticket agent.
+<hr>
 
-* R7: Online customers can only pay using a credit card, while walk-in customers can pay using cash or credit card through the ticket agent.
+<h2>Technologies Used</h2>
+<ul>
+  <li><strong>C++17</strong></li>
+  <li><strong>CMake</strong></li>
+  <li><strong>Git & GitHub</strong></li>
+</ul>
 
-### Stage Three
-* R8: Users can select multiple available seats for a show from a given seating arrangement.
+<hr>
 
-* R9: Each seat type has a fixed cost. There are three types of seats: silver, gold, and platinum.
+<h2>Done by Nikita Balandin 10-V</h2>
 
-* R10: There can only be one ticket allocated per seat.
+<hr>
 
-* R11: No two customers should be able to reserve the same seat.
-
-### Stage Four
-* R12: The admin can perform the following five actions on the show times and the movie:
-
-    * Add a show
-    * Delete a show
-    * Update a show
-    * Add a movie
-    * Delete a movie
-
-* R13: The system should be able to differentiate between available and booked seats.
-
-### Stage Five
-* R14: The system should generate a notification for the following three cases:
-
-    * A new movie has been released.
-    * A booking has been made.
-    * A booking has been canceled.
-
-# Base requirements
-
-* Programming language: C++
-* Visual Studio 2022 (latest release)
-* Git for Windows (latest release)
-* Skill for working with Git from command line (CLI) & Git extension in Visual Studio
-* Following the best practices for C++ / Git / GitHub is a mandatory requirement
-
-Additional requirements will be added later.
+<h2>Future Enhancements</h2>
+<ul>
+  <li>Implement graphical user interface.</li>
+  <li>Switch data storage to database format.</li>
+  <li>Add automated unit tests.</li>
+  <li>Continuous Integration via GitHub Actions.</li>
+</ul>
