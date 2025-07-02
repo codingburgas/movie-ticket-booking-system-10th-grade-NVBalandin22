@@ -226,14 +226,17 @@ void bookTicket(std::vector<Cinema>& cinemas) {
 
     std::cout << "Seats booked!\n";
 }
-
-void addMovie(std::vector<Movie>& movies) {
-    Movie m;
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+Movie newMovie(Movie m) {
+    //std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::cout << "Enter title: ";std::getline(std::cin, m.title);
     std::cout << "Enter genre: ";std::getline(std::cin, m.genre);
     std::cout << "Enter language: ";std::getline(std::cin, m.language);
     std::cout << "Enter release date: ";std::getline(std::cin, m.releaseDate);
+    return m;
+}
+void addMovie(std::vector<Movie>& movies) {
+    Movie m;
+    m = newMovie(m);
     movies.push_back(m);
     std::cout << "Movie added.\n";
 }
@@ -241,15 +244,12 @@ void addMovie(std::vector<Movie>& movies) {
 void updateMovie(std::vector<Movie>& movies) {
     std::string title;
     std::cout << "Enter movie title to update: ";
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::getline(std::cin, title);
 
     for (Movie& m : movies) {
         if (m.title == title) {
-            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "New title: "; std::getline(std::cin, m.title);
-            std::cout << "New genre: "; std::getline(std::cin, m.genre);
-            std::cout << "New language: "; std::getline(std::cin, m.language);
-            std::cout << "New release date: "; std::getline(std::cin, m.releaseDate);
+            m = newMovie(m);
             std::cout << "Movie updated.\n";
             return;
         }
@@ -289,10 +289,7 @@ void addShow(std::vector<Cinema>& cinemas) {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     Show show;
 
-    std::cout << "Movie title: "; std::getline(std::cin, show.movie.title);
-    std::cout << "Genre: "; std::getline(std::cin, show.movie.genre);
-    std::cout << "Language: "; std::getline(std::cin, show.movie.language);
-    std::cout << "Release date: "; std::getline(std::cin, show.movie.releaseDate);
+    show.movie = newMovie(show.movie);
     std::cout << "Show time: "; std::getline(std::cin, show.time);
 
     show.seats = {{1,"silver",false},{2,"gold",false},{3,"platinum",false}};
@@ -322,10 +319,7 @@ void updateShow(std::vector<Cinema>& cinemas) {
     for (Show& s : hall->shows) {
         if (s.movie.title == movieTitle && s.time == time) {
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "Movie title: "; std::getline(std::cin, s.movie.title);
-            std::cout << "Genre: "; std::getline(std::cin, s.movie.genre);
-            std::cout << "Language: "; std::getline(std::cin, s.movie.language);
-            std::cout << "Release date: "; std::getline(std::cin, s.movie.releaseDate);
+            s.movie = newMovie(s.movie);
             std::cout << "Show time: "; std::getline(std::cin, s.time);
             std::cout << "Show updated.\n"; return;
         }
