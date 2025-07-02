@@ -27,4 +27,9 @@ void addCinema(std::vector<Cinema>& cinemas);
 void deleteCinema(std::vector<Cinema>& cinemas);
 void updateCinema(std::vector<Cinema>& cinemas);
 
+void addNotification(const std::string& notification);
+void viewNotifications();
+bool adminLogin();
+
+
 #endif

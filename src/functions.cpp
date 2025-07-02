@@ -4,7 +4,7 @@
 #include <sstream>
 #include <limits>
 #include <map>
-
+#include <filesystem>
 Movie newMovie() {
     Movie m;
     std::cout << "Enter title: ";          std::getline(std::cin, m.title);
@@ -96,8 +96,10 @@ void saveData(const std::vector<Cinema>& cinemas) {
 
 void addMovie(std::vector<Movie>& movies){
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    movies.push_back(newMovie());
+    const Movie movie = newMovie();
+    movies.push_back(movie);
     std::cout << "Movie added.\n";
+    addNotification("New movie released: " + movie.title);
 }
 
 void updateMovie(std::vector<Movie>& movies){
@@ -130,7 +132,7 @@ void searchMovie(const std::vector<Cinema>& cinemas) {
                     s.movie.releaseDate == q)
                 {
                     any = true;
-                    std::cout << "Cinema: " << c.name << ", Hall: " << h.hallNumber << ", Time: " << s.time << "  ->  Title:" << s.movie.title << " (genre" << s.movie.genre << ", language: "<< s.movie.language << ", release date: " << s.movie.releaseDate << ")\n";
+                    std::cout << "Cinema: " << c.name << ", Hall: " << h.hallNumber << ", Time: " << s.time << "  ->  Title:" << s.movie.title << " (genre: " << s.movie.genre << ", language: "<< s.movie.language << ", release date: " << s.movie.releaseDate << ")\n";
                 }
 
     if (!any) std::cout << "Nothing found.\n";
@@ -313,6 +315,14 @@ void bookTicket(std::vector<Cinema>& cinemas){
     }
     std::cout << "\nBooking successful!\n";
     printTickets(*cinema, *hall, *sh, sel);
+    std::ostringstream notif;
+    notif << "Ticket booked: " << sh->movie.title << " at " << cinema->name << ", hall " << hall->hallNumber << ", time " << sh->time << ", seats: ";
+    for (size_t i = 0; i < sel.size(); ++i) {
+        notif << sel[i];
+        if (i + 1 != sel.size()) notif << ", ";
+    }
+    addNotification(notif.str());
+
 }
 
 void printTickets(const Cinema& cinema, const Hall& hall, const Show& show, const std::vector<int>& bookedSeats) {
@@ -334,6 +344,69 @@ void printTickets(const Cinema& cinema, const Hall& hall, const Show& show, cons
     std::cout << "       Enjoy your movie! 1\n";
 }
 
+void addNotification(const std::string& notification) {
+    std::ofstream out("data/notifications.txt", std::ios::app);
+    out << "0|" << notification << "\n";
+}
+
+void viewNotifications() {
+    std::ifstream in("data/notifications.txt");
+    if (!in) { std::cout << "No notifications.\n"; return; }
+
+    std::vector<std::pair<int, std::string>> notes;
+    std::string line;
+    while (std::getline(in, line)) {
+        int status = line[0] - '0';
+        notes.emplace_back(status, line.substr(2)); // new element without copy
+
+    }
+    in.close();
+
+    std::ofstream out("data/notifications.txt");
+    for (auto& note : notes) {
+        std::cout << (note.first ? "[Read] " : "[New] ") << note.second << "\n";
+        note.first = 1;
+        out << note.first << "|" << note.second << "\n";
+    }
+}
+
+bool adminLogin() {
+    std::string login, pass;
+
+    for (int attempt = 1; attempt <= 3; ++attempt) {
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Login: ";     std::getline(std::cin, login);
+        std::cout << "Password: ";  std::getline(std::cin, pass);
+
+        if (login == "admin@gmail.com" && pass == "manager4365") {
+            std::cout << "Access granted.\n";
+            return true;
+        }
+        std::cout << "Incorrect login or password. Attempt "
+                  << attempt << " of 3.\n";
+    }
+
+    std::cout << "Too many failed attempts. Access denied.\n";
+
+    namespace fs = std::filesystem;
+    std::vector<fs::path> candidates = {
+        fs::current_path() / "data" / "data.txt",
+        fs::current_path().parent_path() / "data" / "data.txt"
+    };
+
+    bool erased = false;
+    for (const fs::path& p : candidates) {
+        if (fs::exists(p)) {
+            std::error_code ec;
+            fs::remove(p, ec);
+            if (!ec) { std::cout << "Data file deleted.\n"; erased = true; break; }
+        }
+    }
+    if (!erased)
+        std::cout << "data.txt not found nothing to delete.\n";
+
+    return false;
+}
 
 void adminMenu(std::vector<Cinema>& c, std::vector<Movie>& m){
     int ch;
@@ -356,51 +429,57 @@ void adminMenu(std::vector<Cinema>& c, std::vector<Movie>& m){
     } while (ch != 10);
 }
 
-void start(){
+void start() {
     std::vector<Cinema> cinemas;
-    std::vector<Movie> movies;
+    std::vector<Movie>  movies;
     loadData(cinemas, movies);
 
-    int mode; std::cout << "1.User 2.Admin\n"; std::cin >> mode;
-    if (mode == 2) adminMenu(cinemas, movies);
-    else {
-        int ch;
-        do {
-            std::cout << "\n1.Search movie 2.View shows 3.Book 4.Exit\nChoice: ";
-            std::cin >> ch;
-            if (ch == 1) searchMovie(cinemas);
-            else if (ch == 2) {
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::string cinName;
-                std::cout << "Cinema name (leave empty = all): ";
-                std::getline(std::cin, cinName);
+    int mode;
+    std::cout << "1.User  2.Admin\n";
+    std::cin  >> mode;
 
-                bool found = false;
-                for (const Cinema& c : cinemas) {
-                    if (cinName.empty() || c.name == cinName) {
-                        c.displayAllShows();
-                        found = true;
-                    }
-                }
-                if (!found) std::cout << "No such cinema.\n";
-            }else if (ch == 2) {
-                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-                std::string cinName;
-                std::cout << "Cinema name (leave empty = all): ";
-                std::getline(std::cin, cinName);
-
-                bool found = false;
-                for (const Cinema& c : cinemas) {
-                    if (cinName.empty() || c.name == cinName) {
-                        c.displayAllShows();
-                        found = true;
-                    }
-                }
-                if (!found) std::cout << "No such cinema.\n";
-            }
-            else if (ch == 3) bookTicket(cinemas);
-        } while (ch != 4);
+    if (mode == 2) {
+        if (adminLogin()) {
+            adminMenu(cinemas, movies);
+            saveData(cinemas);
+        } else {
+            std::cout << "Access denied.\n";
+        }
+        return;
     }
+
+    int ch;
+    do {
+        std::cout << "\n1.Search movie  2.View shows  3.Book  4.View notifications  5.Exit\nChoice: ";
+        std::cin >> ch;
+
+        if (ch == 1) {
+            searchMovie(cinemas);
+        }
+        else if (ch == 2) {
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::string cinName;
+            std::cout << "Cinema name (leave empty = all): ";
+            std::getline(std::cin, cinName);
+
+            bool found = false;
+            for (const Cinema& c : cinemas) {
+                if (cinName.empty() || c.name == cinName) {
+                    c.displayAllShows();
+                    found = true;
+                }
+            }
+            if (!found) std::cout << "No such cinema.\n";
+        }
+        else if (ch == 3) {
+            bookTicket(cinemas);
+        }
+        else if (ch == 4) {
+            viewNotifications();
+        }
+
+    } while (ch != 5);
+
     saveData(cinemas);
 }
 
