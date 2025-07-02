@@ -13,6 +13,7 @@ void removeMovie(std::vector<Movie>& movies);
 
 void searchMovie(const std::vector<Cinema>& cinemas);
 void bookTicket(std::vector<Cinema>& cinemas);
+void printTickets(const Cinema& cinema, const Hall& hall, const Show& show, const std::vector<int>& bookedSeats);
 
 void loadData(std::vector<Cinema>& cinemas, std::vector<Movie>& movies);
 void saveData(const std::vector<Cinema>& cinemas);

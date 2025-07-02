@@ -203,7 +203,7 @@ void addShow(std::vector<Cinema>& cinemas, std::vector<Movie>& movies){
     Cinema* cinema = nullptr; for (Cinema& c : cinemas) if (c.name == cinemaName) cinema = &c;
     if (!cinema) { std::cout << "Cinema not found.\n"; return; }
 
-    int hallNum; std::cout << "Hall #: "; std::cin >> hallNum; Hall* hall = nullptr;
+    int hallNum; std::cout << "Hall: "; std::cin >> hallNum; Hall* hall = nullptr;
     for (Hall& h : cinema->halls) if (h.hallNumber == hallNum) hall = &h;
     if (!hall) { std::cout << "Hall not found.\n"; return; }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -212,7 +212,7 @@ void addShow(std::vector<Cinema>& cinemas, std::vector<Movie>& movies){
     std::cout << "existing/new movie? : "; std::getline(std::cin, mode);
     if (mode == "existing") {
         for (size_t i = 0; i < movies.size(); ++i) std::cout << i + 1 << ". " << movies[i].title << "\n";
-        int idx; std::cout << "Select # : "; std::cin >> idx;
+        int idx; std::cout << "Select : "; std::cin >> idx;
         if (idx < 1 || idx > movies.size()) { std::cout << "Bad index.\n"; return; }
         show.movie = movies[idx - 1];
         std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -231,7 +231,7 @@ void updateShow(std::vector<Cinema>& cinemas, std::vector<Movie>& movies){
     Cinema* cinema = nullptr; for (Cinema& c : cinemas) if (c.name == cinemaName) cinema = &c;
     if (!cinema) { std::cout << "Cinema not found.\n"; return; }
 
-    int hallNum; std::cout << "Hall #: "; std::cin >> hallNum; Hall* hall = nullptr;
+    int hallNum; std::cout << "Hall: "; std::cin >> hallNum; Hall* hall = nullptr;
     for (Hall& h : cinema->halls) if (h.hallNumber == hallNum) hall = &h;
     if (!hall) { std::cout << "Hall not found.\n"; return; }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -254,7 +254,7 @@ void deleteShow(std::vector<Cinema>& cinemas){
     Cinema* cinema = nullptr; for (Cinema& c : cinemas) if (c.name == cinemaName) cinema = &c;
     if (!cinema) { std::cout << "Cinema not found.\n"; return; }
 
-    int hallNum; std::cout << "Hall #: "; std::cin >> hallNum; Hall* hall = nullptr;
+    int hallNum; std::cout << "Hall: "; std::cin >> hallNum; Hall* hall = nullptr;
     for (Hall& h : cinema->halls) if (h.hallNumber == hallNum) hall = &h;
     if (!hall) { std::cout << "Hall not found.\n"; return; }
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
@@ -276,35 +276,69 @@ void bookTicket(std::vector<Cinema>& cinemas){
     std::string movieTitle; std::cout << "Movie title: "; std::getline(std::cin, movieTitle);
     cinema->displayShows(movieTitle);
 
-    int hallNum; std::cout << "Hall #: "; std::cin >> hallNum; Hall* hall = nullptr;
+    int hallNum; std::cout << "Hall: "; std::cin >> hallNum; Hall* hall = nullptr;
     for (Hall& h : cinema->halls) if (h.hallNumber == hallNum) hall = &h;
     if (!hall) { std::cout << "Hall not found.\n"; return; }
 
     Show* sh = nullptr; for (Show& s : hall->shows) if (s.movie.title == movieTitle) { sh = &s; break; }
     if (!sh) { std::cout << "Show not found.\n"; return; }
 
-    for (const Seat& seat : sh->seats) std::cout << "[" << seat.number << ":" << (seat.booked ? 'X' : seat.type[0]) << "] ";
-    std::cout << "\nX=Booked\n";
+    std::cout << "\nAvailable seats in hall" << hall->hallNumber << ":\n";
+    for (const Seat& seat : sh->seats) {
+        std::cout << "Seat " << seat.number << ": ";
+        if (seat.booked) std::cout << "booked";
+        else if (seat.type == "silver") std::cout << "silver";
+        else if (seat.type == "gold") std::cout << "gold";
+        else if (seat.type == "platinum") std::cout << "platinum";
+        std::cout << '\n';
+    }
 
-    int count; std::cout << "Seats to book: "; std::cin >> count;
-    std::cout << "Choose seat numbers ";
+    int count; std::cout << "\nHow many seats to book? "; std::cin >> count;
+    std::cout << "Choose seat numbers: ";
     std::vector<int> sel; std::map<std::string, double> price{{"silver",10},{"gold",15},{"platinum",20}};
     double total = 0;
     for (int i = 0; i < count; ++i) {
         int num; std::cin >> num; bool ok = false;
         for (Seat& seat : sh->seats) if (seat.number == num && !seat.booked) { seat.booked = true; sel.push_back(num); total += price[seat.type]; ok = true; break; }
-        if (!ok) { std::cout << "Seat " << num << " unavailable.\n"; for (int id : sel) for (Seat& s : sh->seats) if (s.number == id) s.booked = false; return; }
+        if (!ok) {
+            std::cout << "\nSeat " << num << " unavailable.\n";
+            for (int id : sel) for (Seat& s : sh->seats) if (s.number == id) s.booked = false; return;
+        }
     }
-    std::cout << "Total $" << total << "\nPay (1 credit online, 2 cash, 3 credit): ";
+    std::cout << "\nTotal cost: $" << total << "\nPayment method (1 - credit online, 2 - cash, 3 - credit): ";
     int p; std::cin >> p;
-    if (p < 1 || p > 3) { std::cout << "Cancelled.\n"; for (int id : sel) for (Seat& s : sh->seats) if (s.number == id) s.booked = false; return; }
-    std::cout << "Booked!\n";
+    if (p < 1 || p > 3) {
+        std::cout << "\nCancelled.\n";
+        for (int id : sel) for (Seat& s : sh->seats) if (s.number == id) s.booked = false; return;
+    }
+    std::cout << "\nBooking successful!\n";
+    printTickets(*cinema, *hall, *sh, sel);
 }
+
+void printTickets(const Cinema& cinema, const Hall& hall, const Show& show, const std::vector<int>& bookedSeats) {
+    std::cout << "\n===================== YOUR TICKETS =====================\n";
+    std::cout << "Cinema: " << cinema.name << '\n';
+    std::cout << "Hall: " << hall.hallNumber << " | Movie: " << show.movie.title << '\n';
+    std::cout << "Genre: " << show.movie.genre << " | Language: " << show.movie.language << '\n';
+    std::cout << "Date: " << show.movie.releaseDate << " | Time: " << show.time << '\n';
+    std::cout << "--------------------------------------------------------\n";
+    for (int seatNum : bookedSeats) {
+        for (const Seat& seat : show.seats) {
+            if (seat.number == seatNum) {
+                std::cout << "Seat:" << seat.number << " " << seat.type << "\n";
+                break;
+            }
+        }
+    }
+    std::cout << "========================================================\n";
+    std::cout << "       Enjoy your movie! 1\n";
+}
+
 
 void adminMenu(std::vector<Cinema>& c, std::vector<Movie>& m){
     int ch;
     do {
-        std::cout << "\n1.Add Movie 2.Delete Movie 3.Update Movie 4.Add Show 5.Delete Show 6.Update Show 7.Add Cinema 8.Delete Cinema 9.Update Cinema 10.Exit\nChoice: ";
+        std::cout << "\n 1.Add Movie 2.Delete Movie 3.Update Movie 4.Add Show 5.Delete Show \n 6.Update Show 7.Add Cinema 8.Delete Cinema 9.Update Cinema 10.Exit\n Choice: ";
         std::cin >> ch;
         switch (ch) {
             case 1: addMovie(m); break;
