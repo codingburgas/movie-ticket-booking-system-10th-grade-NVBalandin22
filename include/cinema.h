@@ -15,6 +15,7 @@ struct Cinema {
     std::vector<Hall> halls;
 
     void displayShows(const std::string& movieTitle);
+    void displayAllShows() const;
 };
 
 #endif
