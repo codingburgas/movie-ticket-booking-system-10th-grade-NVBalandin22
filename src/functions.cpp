@@ -5,6 +5,8 @@
 #include <limits>
 #include <map>
 #include <filesystem>
+#include <unordered_set>
+
 Movie newMovie() {
     Movie m;
     std::cout << "Enter title: ";          std::getline(std::cin, m.title);
@@ -14,37 +16,51 @@ Movie newMovie() {
     return m;
 }
 
-void loadData(std::vector<Cinema>& cinemas, std::vector<Movie>& movies) {
+void loadData(std::vector<Cinema>& cinemas, std::vector<Movie>& movies)
+{
     std::ifstream in("data/data.txt");
     if (!in) {
-        Cinema c{"CinemaCity",
-                 {{1, {{{"Inception","Sci-Fi","English","2010-07-16"},"18:00",
-                        {{1,"silver",false},{2,"gold",false},{3,"platinum",false}}}}}}};
-        cinemas = {c};
-        movies  = {c.halls[0].shows[0].movie};
+        Cinema def{"CinemaCity",
+                   {{1, {{{"Inception","Sci-Fi","English","2010-07-16"},"18:00",
+                          {{1,"silver",false},{2,"gold",false},{3,"platinum",false}}}}}}};
+        cinemas = {def};
+        movies  = {def.halls[0].shows[0].movie};
         return;
     }
 
-    cinemas.clear(); movies.clear();
+    cinemas.clear();
+    movies.clear();
+    std::unordered_set<std::string> movieTitles;   // container from stl lib
+
     std::string line; Cinema cinema; Hall hall;
 
     while (std::getline(in, line)) {
+
         if (line.rfind("Cinema ", 0) == 0) {
             if (!cinema.name.empty()) {
-                if (!hall.shows.empty()) { cinema.halls.push_back(hall); hall = {}; }
+                if (!hall.shows.empty()) {
+                    cinema.halls.push_back(hall);
+                    hall = {};
+                }
                 cinemas.push_back(cinema);
                 cinema = {};
             }
             cinema.name = line.substr(7);
         }
+
         else if (line.rfind("Hall ", 0) == 0) {
-            if (!hall.shows.empty()) { cinema.halls.push_back(hall); hall = {}; }
-            hall.hallNumber = std::stoi(line.substr(5));
+            if (!hall.shows.empty()) {
+                cinema.halls.push_back(hall);
+                hall = {};
+            }
+            hall.hallNumber = std::stoi(line.substr(5)); //sstoi substr to int
         }
+
         else if (line.rfind("Show|", 0) == 0) {
             Show sh;
-            std::string rest = line.substr(5);            // без "Show|"
-            std::istringstream parts(rest);
+            std::string rest = line.substr(5);
+            std::istringstream parts(rest);// receive as getline, not cin
+
             std::getline(parts, sh.movie.title,      '|');
             std::getline(parts, sh.movie.genre,      '|');
             std::getline(parts, sh.movie.language,   '|');
@@ -54,20 +70,22 @@ void loadData(std::vector<Cinema>& cinemas, std::vector<Movie>& movies) {
             std::string seatTok;
             while (std::getline(parts, seatTok, '|')) {
                 if (seatTok.empty()) continue;
-                size_t p1 = seatTok.find(':');
-                size_t p2 = seatTok.rfind(':');
+                size_t p1 = seatTok.find(':'), p2 = seatTok.rfind(':');
                 if (p1 == std::string::npos || p2 == p1) continue;
-                Seat seat{
+                sh.seats.push_back({
                     std::stoi(seatTok.substr(0, p1)),
                     seatTok.substr(p1 + 1, p2 - p1 - 1),
                     seatTok.substr(p2 + 1) == "1"
-                };
-                sh.seats.push_back(seat);
+                });
             }
+
             hall.shows.push_back(sh);
-            movies.push_back(sh.movie);
+
+            if (movieTitles.insert(sh.movie.title).second)   // check if movie is new
+                movies.push_back(sh.movie);
         }
     }
+
     if (!hall.shows.empty())   cinema.halls.push_back(hall);
     if (!cinema.name.empty())  cinemas.push_back(cinema);
 }
@@ -78,7 +96,7 @@ void saveData(const std::vector<Cinema>& cinemas) {
         out << "Cinema " << c.name << '\n';
         for (const Hall& h : c.halls) {
             out << "Hall " << h.hallNumber << '\n';
-            for (const Show& s : h.shows) {
+            for (const Show& s : h.shows) { //range based for
                 out << "Show|"
                     << s.movie.title      << '|'
                     << s.movie.genre      << '|'
@@ -94,8 +112,9 @@ void saveData(const std::vector<Cinema>& cinemas) {
 }
 
 
+// funcs for movies
 void addMovie(std::vector<Movie>& movies){
-    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); // skip all symbols before \n
     const Movie movie = newMovie();
     movies.push_back(movie);
     std::cout << "Movie added.\n";
@@ -139,6 +158,7 @@ void searchMovie(const std::vector<Cinema>& cinemas) {
 }
 
 
+// admin funcs for cinemas
 void addCinema(std::vector<Cinema>& cinemas) {
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     Cinema c;
@@ -170,7 +190,7 @@ void updateCinema(std::vector<Cinema>& cinemas) {
             if (!newName.empty()) c.name = newName;
 
             int action;
-            do {
+            do { // halls editing
                 std::cout << "\nHall edit menu:\n1.Add hall\n2.Delete hall\n3.List halls\n4.Exit\nChoice: ";std::cin >> action;
                 if (action == 1) {
                     int num; std::cout << "New hall number: "; std::cin >> num;
@@ -191,7 +211,6 @@ void updateCinema(std::vector<Cinema>& cinemas) {
     std::cout << "Cinema not found.\n";
 }
 
-
 void deleteCinema(std::vector<Cinema>& cinemas){
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::string n; std::cout << "Cinema to delete: "; std::getline(std::cin, n);
@@ -199,6 +218,8 @@ void deleteCinema(std::vector<Cinema>& cinemas){
     std::cout << "Not found.\n";
 }
 
+
+//admin funcs for shows
 void addShow(std::vector<Cinema>& cinemas, std::vector<Movie>& movies){
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::string cinemaName; std::cout << "Cinema: "; std::getline(std::cin, cinemaName);
@@ -269,6 +290,7 @@ void deleteShow(std::vector<Cinema>& cinemas){
     std::cout << "Show not found.\n";
 }
 
+//user func for booking
 void bookTicket(std::vector<Cinema>& cinemas){
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     std::string cinemaName; std::cout << "Cinema: "; std::getline(std::cin, cinemaName);
@@ -344,8 +366,9 @@ void printTickets(const Cinema& cinema, const Hall& hall, const Show& show, cons
     std::cout << "       Enjoy your movie! 1\n";
 }
 
+//notifications
 void addNotification(const std::string& notification) {
-    std::ofstream out("data/notifications.txt", std::ios::app);
+    std::ofstream out("data/notifications.txt", std::ios::app); //cursor in txt at the end
     out << "0|" << notification << "\n";
 }
 
@@ -370,6 +393,7 @@ void viewNotifications() {
     }
 }
 
+
 bool adminLogin() {
     std::string login, pass;
 
@@ -382,8 +406,7 @@ bool adminLogin() {
             std::cout << "Access granted.\n";
             return true;
         }
-        std::cout << "Incorrect login or password. Attempt "
-                  << attempt << " of 3.\n";
+        std::cout << "Incorrect login or password. Attempt " << attempt << " of 3.\n";
     }
 
     std::cout << "Too many failed attempts. Access denied.\n";
@@ -398,8 +421,8 @@ bool adminLogin() {
     for (const fs::path& p : candidates) {
         if (fs::exists(p)) {
             std::error_code ec;
-            fs::remove(p, ec);
-            if (!ec) { std::cout << "Data file deleted.\n"; erased = true; break; }
+            fs::remove(p, ec); //delete file
+            if (!ec) { std::cout << "Data file deleted.\n"; erased = true; break; }//error check
         }
     }
     if (!erased)
@@ -440,6 +463,7 @@ void start() {
 
     if (mode == 2) {
         if (adminLogin()) {
+
             adminMenu(cinemas, movies);
             saveData(cinemas);
         } else {

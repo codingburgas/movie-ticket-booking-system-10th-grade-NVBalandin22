@@ -6,9 +6,6 @@ cmake-build-*/
 .vscode/
 .idea/
 
-data/*
-!data/data.txt
-
 
 *.exe
 *.obj
